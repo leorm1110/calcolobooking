@@ -1,5 +1,14 @@
 import streamlit as st
 import math
+from decimal import Decimal, ROUND_DOWN
+from PIL import Image
+
+# --- Logo (opzionale) ---
+try:
+    logo = Image.open("logo.png")
+    st.image(logo, width=100)
+except:
+    pass
 
 # --- Funzioni di calcolo ---
 def calcola_prezzo_mezzo(veicolo, corsa, notte):
@@ -19,7 +28,7 @@ def calcola_netto_booking(prezzo_booking):
     return senza_iva, netto
 
 def arrotonda_per_difetto_5cent(valore):
-    return math.floor(valore * 20) / 20
+    return float(Decimal(valore).quantize(Decimal("0.05"), rounding=ROUND_DOWN))
 
 # --- UI Streamlit ---
 st.set_page_config(page_title="Calcolo Booking", layout="centered")
