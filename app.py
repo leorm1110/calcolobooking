@@ -2,13 +2,6 @@ import streamlit as st
 import math
 from PIL import Image
 
-# --- Logo (opzionale) ---
-try:
-    logo = Image.open("logo.png")
-    st.image(logo, width=100)
-except:
-    pass
-
 # --- Funzioni di calcolo ---
 def calcola_prezzo_mezzo(veicolo, corsa, notte):
     prezzi = {
@@ -29,20 +22,28 @@ def calcola_netto_booking(prezzo_booking):
 def arrotonda_per_difetto_5cent(valore):
     return math.floor(valore * 20) / 20.0
 
-# --- UI Streamlit ---
+# --- Config pagina ---
 st.set_page_config(page_title="Calcolo Booking", layout="centered")
+
+# --- Logo (opzionale) ---
+try:
+    logo = Image.open("logo.png")
+    st.image(logo, width=100)
+except:
+    pass
 
 st.title("🚗 Calcolo Booking")
 st.markdown("Calcola il netto e confrontalo col costo del mezzo")
 
-# --- Input Utente ---
-veicolo = st.selectbox("Tipo veicolo", ["Standard/Berlina", "Van fino a 6 pax", "Van 7/8 pax"])
-corsa = st.selectbox("Tipo servizio", ["Partenza", "Arrivo", "Spostamento", "Civitavecchia"])
-notte = st.checkbox("Fascia notturna (22:00 - 05:59)")
-prezzo_booking_input = st.text_input("Prezzo da Booking (€)", value="")
+# --- Input ---
+with st.form("booking_form"):
+    veicolo = st.selectbox("Tipo veicolo", ["Standard/Berlina", "Van fino a 6 pax", "Van 7/8 pax"])
+    corsa = st.selectbox("Tipo servizio", ["Partenza", "Arrivo", "Spostamento", "Civitavecchia"])
+    notte = st.checkbox("Fascia notturna (22:00 - 05:59)")
+    prezzo_booking_input = st.text_input("Prezzo da Booking (€)", value="")
+    submitted = st.form_submit_button("Calcola")  # Supporta il tasto INVIO
 
-# --- Calcolo ---
-if st.button("Calcola"):
+if submitted:
     try:
         prezzo_booking = float(prezzo_booking_input.replace(",", "."))
         prezzo_mezzo = calcola_prezzo_mezzo(veicolo, corsa, notte)
@@ -63,6 +64,9 @@ if st.button("Calcola"):
                 f"<div style='{highlight_style}'>Booking Netto: € {netto_arrotondato:.2f}<br>✔ Costo Mezzo: € {prezzo_mezzo:.2f}</div>",
                 unsafe_allow_html=True
             )
+
+        # --- DEBUG ---
+        st.code(f"DEBUG:\nNetto reale: {netto}\nArrotondato: {netto_arrotondato}")
 
     except ValueError:
         st.error("Inserisci un numero valido per il prezzo Booking")
